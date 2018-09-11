@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+    
+</body>
+
+<script>
+
+    let bricks = []
+    
+    let player;
+    
+    let score;
+    let ScoreInt = 0;
+
+    let canvas = document.createElement('div');
+    canvas.style.width = "800px";
+    canvas.style.height = "800px";
+    canvas.style.backgroundColor = 'yellow';
+    canvas.style.borderColor = 'red';
+
+    player = document.createElement('div');
+    player.style.width = '300px';
+    player.style.height = '15px';
+    player.style.position = 'absolute';
+    player.style.left = 400  + 'px';
+    player.style.top = 780 + 'px';
+    player.style.backgroundColor = 'silver';
+    canvas.appendChild(player);
+
+    score = document.createElement('p');
+    score.style.position = 'absolute';
+    score.style.left = '10px';
+    score.style.top = '10px';
+    score.innerHTML = 'Score: ';
+    canvas.appendChild(score);
+
+    document.addEventListener("keydown", function(e){
+
+        if(e.keyCode == 39 && player.offsetLeft + player.offsetWidth < 800){
+            player.style.left = player.offsetLeft + 15 + 'px';
+        }
+        if(e.keyCode == 37 && player.offsetLeft > 10){
+            player.style.left = player.offsetLeft - 15 + 'px';
+        }
+    });
+    document.body.appendChild(canvas);
+
+    let ball;
+    ball = document.createElement('div');
+    ball.style.width = '50px';
+    ball.style.height = '50px';
+    ball.style.borderRadius = '50px';
+    ball.style.backgroundColor = 'white';
+    ball.style.position = 'absolute';
+    ball.style.left = canvas.offsetWidth/2 + 'px';
+    ball.style.top = canvas.offsetHeight/2 + 'px';
+    canvas.appendChild(ball);
+    
+    function createBricks(){
+        let bricksCanvas = document.createElement('div');
+
+        let rows = 5;
+        let columns = 5;
+        let posX = 100;
+        let posY = 100;
+    
+        for(let i=0; i< rows ; i++){
+            for(let j = 0; j< columns; j++){
+                let brick = document.createElement('div');
+                brick.style.width = '60px';
+                brick.style.height = '25px';
+            // brick.style.margin = '5px';
+                brick.style.backgroundColor = 'green';
+                brick.style.position = 'absolute';
+                brick.style.left = posX + 'px';
+                brick.style.top = posY + 'px';
+                bricksCanvas.appendChild(brick);
+                bricks.push(brick);
+                posX = posX + 60 + 5;
+            }
+            posY = posY + 25 + 5;
+            posX = posX - columns*60 + (columns - 1) * 5;   
+            
+        }
+        canvas.appendChild(bricksCanvas);
+        return bricks;
+    }
+
+    let playAble = true;
+    document.addEventListener('keydown', function(e){
+        if(e.keyCode == 32 && playAble == true){
+            ScoreInt = 0;
+            playAble = false;
+            ball.style.left = canvas.offsetWidth/2 + 'px';
+            ball.style.top = canvas.offsetHeight/2 + 'px';
+            move(ball);
+        }
+    });
+       
+    function move(ball){
+        let bricks = createBricks();
+        let direction = [0, 3];
+        let gameOver = false;
+
+        let interval = setInterval(function(){
+            ball.style.left = ball.offsetLeft + direction[0] + 'px';
+            ball.style.top = ball.offsetTop + direction[1] + 'px';
+            score.innerHTML = 'Score: ' + ScoreInt;
+            if(ball.offsetLeft < 0 || ball.offsetLeft > 780){
+                direction[0] = -direction[0];
+        
+            } 
+            if(ball.offsetTop > 780 || ball.offsetTop < 0){
+                direction[1] = -direction[1];
+            }
+            if(ball.offsetTop > 780){
+                gameOver = true;
+            }
+            if(collideWithPlayer()){
+                direction[1] = -direction[1];
+            }else if(collidePlayerHoriz()){
+                direction[0] = -direction[0];
+            }
+            
+            for(let i = 0; i<bricks.length; i++){
+                if(checkforcolision(bricks[i])){
+                    ScoreInt += 10;
+                    bricks[i].style.display = 'none';
+                    direction[0] *=-1;
+                    direction[1] *=-1;
+                    if(i % 2 == 0 && direction[0] + 1 != 0 && direction[0] < 3){
+                        //direction[0] *=-1;
+                        direction[0] += 1;
+                    }else if (direction[0] -1 != 0 && direction[0] < 3){
+                        direction[0] -=1;
+                    }
+                }
+            }
+            if(finish()){
+                alert('Congrads!');
+                gameOver = true;
+            }
+            if(gameOver){
+                clearInterval(interval);
+                playAble = true;
+                alert('Your final score: ' + ScoreInt);
+            }
+        }, 10, ball);
+    }
+
+    function finish(){
+        let sem = true;
+        for(let i=0; i<bricks.length; i++){
+            if(bricks[i].style.display != 'none'){
+                sem = false;
+            }
+        }      
+        return sem;
+    }
+
+    function collideWithPlayer(){
+        if(player.offsetLeft <= ball.offsetLeft+20 && player.offsetLeft+player.offsetWidth > ball.offsetLeft+20 && ball.offsetTop + 50 >= player.offsetTop){
+            return true;
+        }   
+    }
+
+    function collidePlayerHoriz(){
+        if(ball.offsetLeft + ball.offsetWidth >= player.offsetLeft && ball.offsetTop + ball.offsetHeight/2 > player.offsetTop && ball.offsetTop + ball.offsetHeight/2 < player.offsetTop + player.offsetHeight){
+            return true;
+        }else if(ball.offsetLeft <= player.offsetLeft + player.offsetWidth && ball.offsetTop + ball.offsetHeight/2 > player.offsetTop && ball.offsetTop + ball.offsetHeight/2 < player.offsetTop + player.offsetHeight){
+            return true;
+        }
+        return false;
+    }
+
+
+    function checkforcolision(brick){
+        //let midDown = ball.offsetLeft + ball.offsetWidth/2;
+        let ballLeft = ball.offsetLeft;
+        let ballRight = ball.offsetLeft + ball.offsetWidth;
+        let ballTop = ball.offsetTop;
+        let ballBttm = ball.offsetTop + ball.offsetHeight;
+        
+        if(ballRight > brick.offsetLeft && ballTop + ball.offsetHeight/2 > brick.offsetTop && brick.offsetTop + brick.offsetHeight > ballTop + ball.offsetHeight/2 && ballLeft < brick.offsetLeft){ //left
+            return true;
+        }else if(ballLeft < brick.offsetLeft + brick.offsetWidth && ballTop + ball.offsetHeight/2 > brick.offsetTop && brick.offsetTop + brick.offsetHeight > ballTop + ball.offsetHeight/2 && ballRight > brick.offsetLeft + brick.offsetWidth){ //right
+            return true;
+        }else if(ballLeft + ball.offsetWidth/2 > brick.offsetLeft && ballLeft + ball.offsetWidth/2 < brick.offsetLeft + brick.offsetWidth && brick.offsetTop + brick.offsetHeight > ballTop && ballTop > brick.offsetTop){ //down
+            return true;
+        }
+        
+        /*else if(ball.offsetTop < brick.offsetTop + brick.offsetHeight&& midDown > brick.offsetLeft && midDown < (brick.offsetLeft + brick.offsetWidth)){
+            return true;
+        }else if(ball.offsetLeft + ball.offsetWidth > brick.offsetLeft&& midDown > brick.offsetLeft && midDown < (brick.offsetLeft + brick.offsetWidth)){
+            return true;
+        }else if(ball.offsetTop + ball.offsetHeight > brick.offsetTop&& midDown > brick.offsetLeft && midDown < (brick.offsetLeft + brick.offsetWidth)){
+            return true;
+        }*/
+
+        /* mingea loveste 
+        STANGA
+        -dreapta mingii e mai mare decat stanga brick
+        -brick.top e mai mic decat minge.top + height/2
+        -brick.bottom e mai mare decat minge.top + height/2
+
+
+        DREAPTA
+
+        SUS
+
+        JOS
+
+        */
+        
+        //console.log(midDown);
+
+        return false;
+    }
+    
+
+</script>
+</html>
