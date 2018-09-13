@@ -5,12 +5,19 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Page Title</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src='Brick.js'></script>
+    <script src='Ball.js'></script>
 </head>
 <body>
     
 </body>
 
-<script>
+<script> 
+/*
+TODO: 
+-at the begin, move ball with the player -> start from where the player wants
+
+*/
 
     let bricks = []
     
@@ -21,7 +28,7 @@
         canvas.style.width = "800px";
         canvas.style.height = "800px";
         canvas.style.backgroundColor = 'yellow';
-        canvas.style.borderColor = 'red';
+        //canvas.style.borderColor = 'red';
         document.body.appendChild(canvas);
     }
 
@@ -58,16 +65,8 @@
     
     let ball;
     function createBall(){
-        ball = document.createElement('img');
-        ball.src = 'src/ball.png'
-        ball.style.width = '50px';
-        ball.style.height = '50px';
-        ball.style.borderRadius = '50px';
-        ball.style.backgroundColor = 'white';
-        ball.style.position = 'absolute';
-        ball.style.left = canvas.offsetWidth/2 + 'px';
-        ball.style.top = canvas.offsetHeight/2 + 'px';
-        canvas.appendChild(ball);
+        ball = new Ball(canvas.offsetWidth, canvas.offsetHeight);
+        canvas.appendChild(ball.Elem);
     }
     
     function createBricks(){
@@ -80,17 +79,8 @@
     
         for(let i=0; i< rows ; i++){
             for(let j = 0; j< columns; j++){
-                let brick = document.createElement('img');
-                brick.src = 'src/brick.png'
-                brick.style.width = '60px';
-                brick.style.height = '25px';
-            // brick.style.margin = '5px';
-                brick.style.backgroundColor = 'green';
-                brick.style.borderRadius = '5px';   
-                brick.style.position = 'absolute';
-                brick.style.left = posX + 'px';
-                brick.style.top = posY + 'px';
-                bricksCanvas.appendChild(brick);
+                let brick = new Brick(posX, posY);
+                bricksCanvas.appendChild(brick.BrickElem);  
                 bricks.push(brick);
                 posX = posX + 60 + 5;
             }
@@ -108,8 +98,8 @@
             if(e.keyCode == 32 && playAble == true){
                 ScoreInt = 0;
                 playAble = false;
-                ball.style.left = canvas.offsetWidth/2 + 'px';
-                ball.style.top = canvas.offsetHeight/2 + 'px';
+                ball.left(canvas.offsetWidth/2 + 'px');
+                ball.top(canvas.offsetHeight/2 + 'px');
                 move(ball);
             }
         });
@@ -121,8 +111,8 @@
         let gameOver = false;
 
         let interval = setInterval(function(){
-            ball.style.left = ball.offsetLeft + direction[0] + 'px';
-            ball.style.top = ball.offsetTop + direction[1] + 'px';
+            ball.left(ball.offsetLeft + direction[0] + 'px');
+            ball.top(ball.offsetTop + direction[1] + 'px');
             score.innerHTML = 'Score: ' + ScoreInt;
             if(ball.offsetLeft < 0 || ball.offsetLeft + ball.offsetWidth > canvas.offsetWidth){
                 direction[0] = -direction[0];
@@ -143,7 +133,7 @@
             for(let i = 0; i<bricks.length; i++){
                 if(checkforcolision(bricks[i])){
                     ScoreInt += 10;
-                    bricks[i].style.display = 'none';
+                    bricks[i].hide();
                     direction[0] *=-1;
                     direction[1] *=-1;
                     if(i % 2 == 0 && direction[0] + 1 != 0 && direction[0] < 3){
@@ -169,7 +159,7 @@
     function AllBricksDown(){
         let sem = true;
         for(let i=0; i<bricks.length; i++){
-            if(bricks[i].style.display != 'none'){
+            if(bricks[i].isDisplayed){
                 sem = false;
             }
         }      
@@ -182,6 +172,9 @@
         }   
     }
 
+    /*
+    TODO:
+    */
     function collidePlayerHoriz(){
         if(ball.offsetLeft + ball.offsetWidth >= player.offsetLeft && ball.offsetTop + ball.offsetHeight/2 > player.offsetTop && ball.offsetTop + ball.offsetHeight/2 < player.offsetTop + player.offsetHeight){
             return true;
@@ -190,9 +183,10 @@
         }
         return false;
     }
+    
 
     function checkforcolision(brick){
-        //let midDown = ball.offsetLeft + ball.offsetWidth/2;
+        
         let ballLeft = ball.offsetLeft;
         let ballRight = ball.offsetLeft + ball.offsetWidth;
         let ballTop = ball.offsetTop;
@@ -204,33 +198,10 @@
             return true;
         }else if(ballLeft + ball.offsetWidth/2 > brick.offsetLeft && ballLeft + ball.offsetWidth/2 < brick.offsetLeft + brick.offsetWidth && brick.offsetTop + brick.offsetHeight > ballTop && ballTop > brick.offsetTop){ //down
             return true;
+        }else if(ballLeft + ball.offsetWidth/2 > brick.offsetLeft && ballLeft + ball.offsetWidth/2 < brick.offsetLeft + brick.offsetWidth && brick.offsetTop + brick.offsetHeight > ballTop && ballBttm > brick.offsetTop){ //up
+            return true;
         }
         
-        /*else if(ball.offsetTop < brick.offsetTop + brick.offsetHeight&& midDown > brick.offsetLeft && midDown < (brick.offsetLeft + brick.offsetWidth)){
-            return true;
-        }else if(ball.offsetLeft + ball.offsetWidth > brick.offsetLeft&& midDown > brick.offsetLeft && midDown < (brick.offsetLeft + brick.offsetWidth)){
-            return true;
-        }else if(ball.offsetTop + ball.offsetHeight > brick.offsetTop&& midDown > brick.offsetLeft && midDown < (brick.offsetLeft + brick.offsetWidth)){
-            return true;
-        }*/
-
-        /* mingea loveste 
-        STANGA
-        -dreapta mingii e mai mare decat stanga brick
-        -brick.top e mai mic decat minge.top + height/2
-        -brick.bottom e mai mare decat minge.top + height/2
-
-
-        DREAPTA
-
-        SUS
-
-        JOS
-
-        */
-        
-        //console.log(midDown);
-
         return false;
     }
 
