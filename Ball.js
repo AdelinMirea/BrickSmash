@@ -32,11 +32,18 @@ class Ball{
     }
 
     left(pos){
+        this.ball.style.transform = 'rotate('+ this.ball.offsetLeft + 'deg)';
         this.ball.style.left = pos;
     }
     
     top(pos){
         this.ball.style.top = pos;
+    }
+    
+    WH(w){
+        this.ball.style.width = w + 'px';
+        this.ball.style.height = w + 'px';
+        this.ball.style.borderRadius = w + 'px';
     }
     
 }

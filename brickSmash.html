@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Page Title</title>
+    <title>BrickSmash</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src='Brick.js'></script>
     <script src='Ball.js'></script>
@@ -22,7 +22,6 @@ TODO:
     let bricks = []
     
     let canvas;
-
     function createCanvas(){
         canvas = document.createElement('div');
         canvas.style.width = "800px";
@@ -35,6 +34,7 @@ TODO:
     let player;
     let score;
     let ScoreInt = 0;
+
     function createPlayer(){
         player = document.createElement('div');
         player.style.width = '300px';
@@ -44,16 +44,10 @@ TODO:
         player.style.top = 780 + 'px';
         player.style.backgroundColor = 'silver';
         canvas.appendChild(player);
-
         
-        document.addEventListener("keydown", function(e){
-            if(e.keyCode == 39 && player.offsetLeft + player.offsetWidth < 800){
-                player.style.left = player.offsetLeft + 15 + 'px';
-            }
-            if(e.keyCode == 37 && player.offsetLeft > 10){
-                player.style.left = player.offsetLeft - 15 + 'px';
-            }
-        });
+        movePlayerWithKeys();
+        movePlayerWithMouse();
+        
 
         score = document.createElement('p');
         score.style.position = 'absolute';
@@ -62,7 +56,25 @@ TODO:
         score.innerHTML = 'Score: ';
         canvas.appendChild(score);
     }
+
+    function movePlayerWithKeys(){
+        document.addEventListener("keydown", function(e){
+            if(e.keyCode == 39 && player.offsetLeft + player.offsetWidth < 800){
+                player.style.left = player.offsetLeft + 15 + 'px';
+            }
+            if(e.keyCode == 37 && player.offsetLeft > 10){
+                player.style.left = player.offsetLeft - 15 + 'px';
+            }
+        });
+    }
     
+    function movePlayerWithMouse(){
+        document.addEventListener('mousemove', function(mouse){
+            if(mouse.clientX - player.offsetWidth / 2 > 10 && mouse.clientX + player.offsetWidth / 2 < 800){
+                player.style.left = mouse.clientX - player.offsetWidth/2 + 'px';
+            }
+        });
+    }
     let ball;
     function createBall(){
         ball = new Ball(canvas.offsetWidth, canvas.offsetHeight);
@@ -126,6 +138,7 @@ TODO:
             }
             if(collideWithPlayer()){
                 direction[1] = -direction[1];
+                //ball.WH(70);
             }else if(collidePlayerHoriz()){
                 direction[0] = -direction[0];
             }
@@ -153,7 +166,7 @@ TODO:
                 playAble = true;
                 alert('Your final score: ' + ScoreInt);
             }
-        }, 10, ball);
+        }, 6, ball);
     }
 
     function AllBricksDown(){
@@ -206,7 +219,7 @@ TODO:
     }
 
     function main(){
-        
+        alert('Press Space to begin');
         createCanvas();
         createPlayer();
         createBall();
